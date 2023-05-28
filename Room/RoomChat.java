@@ -24,10 +24,10 @@ public class RoomChat implements IRoomChat {
         }
     }
 
-    public void joinRoom(String usrName, IUserChat user) {
-        // if (userList.containsKey(usrName)) {
-        //     throw new RemoteException("INVALIDNAME " + usrName + " already exists in this room!");
-        // }
+    public void joinRoom(String usrName, IUserChat user) throws RemoteException {
+        if (userList.containsKey(usrName)) {
+            throw new RemoteException("INVALIDNAME " + usrName + " already exists in this room!");
+        }
     
         userList.put(usrName, user);
 
@@ -40,10 +40,10 @@ public class RoomChat implements IRoomChat {
         }
     }
 
-    public void leaveRoom(String usrName) {
-        // if (!userList.containsKey(usrName)) {
-        //     throw new RemoteException("ROOMALERT " + usrName + " does not exist in this room!");
-        // }
+    public void leaveRoom(String usrName) throws RemoteException {
+        if (!userList.containsKey(usrName)) {
+            throw new RemoteException("ROOMALERT " + usrName + " does not exist in this room!");
+        }
 
         for (Map.Entry<String, IUserChat> entry : userList.entrySet()) {
             try {
