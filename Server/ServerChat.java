@@ -1,10 +1,13 @@
 package Server;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+
+import Room.RoomChat;
 
 public class ServerChat implements IServerChat
 {
-    private  ArrayList<String> roomList; //RFA1
+    private  ArrayList<String> roomList; //RFA1 RFA3
 
     public ServerChat() {
         roomList = new ArrayList<String>();
@@ -16,7 +19,14 @@ public class ServerChat implements IServerChat
     }
 
     public void createRoom(String roomName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createRoom'");
+        // if (roomList.contains(roomName)) {
+        //     throw new RemoteException("INVALIDNAME " + roomName + " already exists!");
+        // }
+
+        try {
+            roomList.add(roomName);
+        } catch(Exception e) {
+            System.out.println("Server Exception! " + e.getMessage());
+        }
     }
 }

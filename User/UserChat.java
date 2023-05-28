@@ -11,7 +11,7 @@ public class UserChat implements IUserChat
 
     public UserChat(IServerChat server) {
         this.server = server;
-        this.roomList = server.getRooms();
+        this.roomList = server.getRooms(); // RFA4 RFA5
     }
 
     public void deliverMsg(String senderName, String msg) {
