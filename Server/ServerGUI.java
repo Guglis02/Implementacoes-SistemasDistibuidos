@@ -48,7 +48,7 @@ public class ServerGUI {
         frame.getContentPane().add(label, BorderLayout.NORTH);
         
         listScroller = new JScrollPane(list);
-        listScroller.setPreferredSize(new Dimension(300,300));
+        listScroller.setPreferredSize(new Dimension(500,300));
 
         frame.getContentPane().add(listScroller, BorderLayout.CENTER);
 

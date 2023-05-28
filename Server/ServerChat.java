@@ -7,11 +7,19 @@ import java.util.ArrayList;
 
 import Room.RoomChat;
 
-public class ServerChat implements IServerChat
+public class ServerChat implements IServerChat, java.io.Serializable
 {
     private ArrayList<String> roomList; //RFA1 RFA3
-    private ServerGUI gui; 
+    private transient ServerGUI gui; 
     private static Registry registry;
+
+    static {
+        try {
+            registry = LocateRegistry.createRegistry(2020);
+        } catch(RemoteException e) {
+            System.out.println("Server Exception! " + e.getMessage());
+        }
+    }
 
     public ServerChat() {
         roomList = new ArrayList<String>();
@@ -19,7 +27,7 @@ public class ServerChat implements IServerChat
     }
 
     // RFA5
-    public ArrayList<String> getRooms() {
+    public ArrayList<String> getRooms() throws RemoteException {
         return roomList; 
     }
 
@@ -31,7 +39,6 @@ public class ServerChat implements IServerChat
         try {
             RoomChat room = new RoomChat(roomName);
             registry.rebind(roomName, room);
-
             roomList.add(roomName);
             gui.CreateRoomVisual(roomName);
         } catch(Exception e) {
@@ -54,13 +61,10 @@ public class ServerChat implements IServerChat
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 2020;
         String name = "Servidor";
         
         try {
             ServerChat serverObject = new ServerChat();
-            
-            registry = LocateRegistry.createRegistry(port);
             registry.rebind(name, serverObject);
             
             System.out.println("The chat server is running...");
