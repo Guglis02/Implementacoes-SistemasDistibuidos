@@ -13,22 +13,19 @@ public class ServerChat implements IServerChat, java.io.Serializable
     private transient ServerGUI gui; 
     private static Registry registry;
 
-    static {
+    public ServerChat() {
         try {
             registry = LocateRegistry.createRegistry(2020);
-        } catch(RemoteException e) {
+        } catch (RemoteException e) {
             System.out.println("Server Exception! " + e.getMessage());
         }
-    }
-
-    public ServerChat() {
         roomList = new ArrayList<String>();
         gui = new ServerGUI(this);
     }
 
     // RFA5
     public ArrayList<String> getRooms() throws RemoteException {
-        return roomList; 
+        return roomList;
     }
 
     public void createRoom(String roomName) throws RemoteException {
@@ -38,7 +35,7 @@ public class ServerChat implements IServerChat, java.io.Serializable
 
         try {
             RoomChat room = new RoomChat(roomName);
-            registry.rebind(roomName, room);
+            getRegistry().rebind(roomName, room);
             roomList.add(roomName);
             gui.CreateRoomVisual(roomName);
         } catch(Exception e) {
@@ -52,7 +49,7 @@ public class ServerChat implements IServerChat, java.io.Serializable
         }
 
         try {
-            registry.unbind(roomName);            
+            getRegistry().unbind(roomName);
             roomList.remove(roomName);
             gui.RemoveRoomVisual(roomName);
         } catch(Exception e) {
@@ -65,11 +62,29 @@ public class ServerChat implements IServerChat, java.io.Serializable
         
         try {
             ServerChat serverObject = new ServerChat();
-            registry.rebind(name, serverObject);
+            getRegistry().rebind(name, serverObject);
             
             System.out.println("The chat server is running...");
         } catch (Exception e) {
             System.out.println("Server Exception! " + e.getMessage());
         }
+    }
+
+    private static Registry getRegistry()
+    {
+        if (registry == null)
+        {
+            try {
+                registry = LocateRegistry.createRegistry(2020);
+            } catch (RemoteException e1) {
+                try {
+                    registry = LocateRegistry.getRegistry("localhost", 2020);
+                }
+                catch (RemoteException e2) {
+                    System.out.println("Server Exception! " + e2.getMessage());
+                }
+            }
+        }
+        return registry;
     }
 }
