@@ -30,7 +30,6 @@ public class UserGUI {
     private JFrame frame;
     private JTextPane messagePane;
     private JTextField textField;
-    private JScrollPane scrollPane;
     private JButton sendButton;
     private JPanel textFieldPane;
     private JComponent messagesPane;
@@ -49,6 +48,9 @@ public class UserGUI {
 
         GenerateMainPane(user);
         SetButtonActions(user);
+
+        user.GetRoomsFromServer();        
+        UpdateRoomList(user.getRoomList());   
         
         frame.setVisible(true);
     }    
@@ -81,8 +83,7 @@ public class UserGUI {
         roomListVisual = new JList<String>(roomListElement);
         roomListVisual.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         roomListVisual.setLayoutOrientation(JList.VERTICAL);
-        roomListVisual.setVisibleRowCount(-1);
-        UpdateRoomList(user.getRoomList());     
+        roomListVisual.setVisibleRowCount(-1);  
 
         JLabel roomListLabel = new JLabel("<html><b>Rooms:</b></html>");
         roomListLabel.setForeground(Color.DARK_GRAY);
@@ -95,6 +96,7 @@ public class UserGUI {
         joinButton = new JButton("Join");
         joinButton.setEnabled(false);
         leaveButton = new JButton("Leave");
+        leaveButton.setEnabled(false);
 
         JPanel ButtonPanel = new JPanel();
         ButtonPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -225,10 +227,16 @@ public class UserGUI {
                 } else
                     JOptionPane.showMessageDialog(frame, "Error joining room");
             }
+            
+            leaveButton.setEnabled(true);
+            textField.setEditable(true);
+            frame.setTitle(user.getUsrName() + " - " + user.getCurrentRoomName());
         });
 
         leaveButton.addActionListener(e -> {
             user.leaveRoom();
+            leaveButton.setEnabled(false);
+            textField.setEditable(false);
         });
     }
 

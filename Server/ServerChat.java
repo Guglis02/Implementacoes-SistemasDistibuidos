@@ -14,11 +14,7 @@ public class ServerChat implements IServerChat, java.io.Serializable
     private static Registry registry;
 
     public ServerChat() {
-        try {
-            registry = LocateRegistry.createRegistry(2020);
-        } catch (RemoteException e) {
-            System.out.println("Server Exception! " + e.getMessage());
-        }
+        getRegistry();
         roomList = new ArrayList<String>();
         gui = new ServerGUI(this);
     }

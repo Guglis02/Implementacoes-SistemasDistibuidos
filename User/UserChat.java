@@ -3,13 +3,10 @@ package User;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-
-import javax.swing.JOptionPane;
 
 import Room.IRoomChat;
 import Server.IServerChat;
@@ -30,7 +27,6 @@ public class UserChat implements IUserChat
         this.usrName = "";
         this.roomList = new ArrayList<String>();
         gui = new UserGUI(this);
-        GetRoomsFromServer();
 
         // Add a WindowListener to the UserGUI instance
         WindowListener exitListener = new WindowAdapter() {
@@ -77,6 +73,8 @@ public class UserChat implements IUserChat
     public void GetRoomsFromServer()
     {        
         try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2020);
+            IServerChat server = (IServerChat) registry.lookup("Servidor");
             this.roomList = server.getRooms(); // RFA4 RFA5
         } catch (Exception e) {
             System.err.println("Client exception! " + e.toString());
@@ -90,7 +88,6 @@ public class UserChat implements IUserChat
 
         Registry registry = LocateRegistry.getRegistry("localhost", 2020);
         room = (IRoomChat) registry.lookup(selectedRoom);
-        System.out.println("EU N AGUENTO MAIS");
         room.joinRoom(usrName, this);
     }
 
@@ -116,7 +113,9 @@ public class UserChat implements IUserChat
         }
     }
 
-    public void tryCreateRoom(String roomName) throws Exception {           
+    public void tryCreateRoom(String roomName) throws Exception {    
+        Registry registry = LocateRegistry.getRegistry("localhost", 2020);
+        IServerChat server = (IServerChat) registry.lookup("Servidor");       
         server.createRoom(roomName);
     }
 
