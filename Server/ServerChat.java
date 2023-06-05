@@ -3,17 +3,18 @@ package Server;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
 import Room.RoomChat;
 
-public class ServerChat implements IServerChat
+public class ServerChat extends UnicastRemoteObject implements IServerChat
 {
     private ArrayList<String> roomList; //RFA1 RFA3
     private ServerGUI gui; 
     private static Registry registry;
 
-    public ServerChat() {
+    public ServerChat() throws RemoteException {
         getRegistry();
         roomList = new ArrayList<String>();
         gui = new ServerGUI(this);

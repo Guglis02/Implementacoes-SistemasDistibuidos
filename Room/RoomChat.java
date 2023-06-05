@@ -6,11 +6,11 @@ import java.rmi.server.*;
 
 import User.IUserChat;
 
-public class RoomChat implements IRoomChat, java.io.Serializable {
+public class RoomChat extends UnicastRemoteObject implements IRoomChat {
     private String roomName;
     private Map<String, IUserChat> userList; //RFA2
 
-    public RoomChat(String roomName) {
+    public RoomChat(String roomName) throws RemoteException {
         this.roomName = roomName;
         userList = new java.util.HashMap<String, IUserChat>();
     }
