@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import Room.IRoomChat;
 import Server.IServerChat;
 
-public class UserChat extends UnicastRemoteObject implements IUserChat
+public class UserChat extends UnicastRemoteObject implements IUserChat // RFA17
 {
     private String usrName;
 
@@ -39,6 +39,7 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
         gui.addWindowListener(exitListener);
     }
 
+    // RFA10
     public void deliverMsg(String senderName, String msg) {
         gui.ShowMessage(senderName, msg);
     }
@@ -48,8 +49,7 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
     }
 
     public void setUsrName(String usrName) {
-        if (usrName == null)
-        {
+        if (usrName == null) {
             return;
         }
         this.usrName = usrName;
@@ -71,8 +71,8 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
         }
     }
 
-    public void GetRoomsFromServer()
-    {        
+    // RFA4
+    public void GetRoomsFromServer() {
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 2020);
             IServerChat server = (IServerChat) registry.lookup("Servidor");
@@ -82,6 +82,7 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
         }
     }
 
+    // RFA7
     public void tryJoinRoom(String selectedRoom) throws Exception {
         if (selectedRoom == null) {
             return;
@@ -92,6 +93,7 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
         room.joinRoom(usrName, this);
     }
 
+    // RFA12
     public void leaveRoom() {
         if (room == null) {
             return;
@@ -101,11 +103,17 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
             room.leaveRoom(usrName);
             usrName = "";
             room = null;
+
+            gui.leaveButton.setEnabled(false);
+            gui.textField.setEditable(false);
+            gui.textField.setText("");
+            gui.frame.setTitle("Join some room to choose a nickname");
         } catch (RemoteException e) {
             System.err.println("Client exception! " + e.toString());
         }
     }
 
+    // RFA9
     public void sendMessage(String message) {
         try {
             room.sendMsg(usrName, message);
@@ -114,15 +122,16 @@ public class UserChat extends UnicastRemoteObject implements IUserChat
         }
     }
 
-    public void tryCreateRoom(String roomName) throws Exception {    
+    // RFA8
+    public void tryCreateRoom(String roomName) throws Exception {
         Registry registry = LocateRegistry.getRegistry("localhost", 2020);
-        IServerChat server = (IServerChat) registry.lookup("Servidor");       
+        IServerChat server = (IServerChat) registry.lookup("Servidor");
         server.createRoom(roomName);
     }
 
     public static void main(String[] args) {
         int port = 2020;
-        
+
         try {
             System.out.println("Connecting to server...");
             Registry registry = LocateRegistry.getRegistry("localhost", port);

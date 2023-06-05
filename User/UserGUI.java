@@ -27,37 +27,43 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 public class UserGUI {
-    private JFrame frame;
+    public JFrame frame;
     private JTextPane messagePane;
-    private JTextField textField;
+    public JTextField textField;
     private JButton sendButton;
     private JPanel textFieldPane;
     private JComponent messagesPane;
     private DefaultListModel<String> roomListElement;
+
+    // RFA15
     private JButton refreshButton;
     private JButton createButton;
     private JButton joinButton;
-    private JButton leaveButton;
+    public JButton leaveButton;
+
     private JList<String> roomListVisual;
     private String selectedRoom;
 
-    public UserGUI(UserChat user)
-    {
+    private UserChat user;
+
+    public UserGUI(UserChat user) {
+        this.user = user;
+
         frame = new JFrame("Join some room to choose a nickname");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        GenerateMainPane(user);
-        SetButtonActions(user);
+        GenerateMainPane();
+        SetButtonActions();
 
-        user.GetRoomsFromServer();        
-        UpdateRoomList(user.getRoomList());   
-        
+        user.GetRoomsFromServer();
+        UpdateRoomList(user.getRoomList());
+
         frame.setVisible(true);
-    }    
-    
-    private void GenerateMainPane(UserChat user) {      
+    }
+
+    private void GenerateMainPane() {
         // Barra de input de texto e botão de enviar
-        textFieldPane = new JPanel(new BorderLayout());  
+        textFieldPane = new JPanel(new BorderLayout());
         sendButton = new JButton("Send");
         textField = new JTextField(50);
         textField.setEditable(false);
@@ -83,7 +89,7 @@ public class UserGUI {
         roomListVisual = new JList<String>(roomListElement);
         roomListVisual.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         roomListVisual.setLayoutOrientation(JList.VERTICAL);
-        roomListVisual.setVisibleRowCount(-1);  
+        roomListVisual.setVisibleRowCount(-1);
 
         JLabel roomListLabel = new JLabel("<html><b>Rooms:</b></html>");
         roomListLabel.setForeground(Color.DARK_GRAY);
@@ -116,13 +122,13 @@ public class UserGUI {
         frame.getContentPane().add(messagesPane, BorderLayout.CENTER);
         frame.getContentPane().add(textFieldPane, BorderLayout.SOUTH);
         frame.getContentPane().add(roomListContainer, BorderLayout.WEST);
-        
+
         // Define estilo de mensagens do servidor e de usuários
         setMessageStyles();
-                        
+
         frame.pack();
     }
-    
+
     private void setMessageStyles() {
         Style userMessageStyle = messagePane.addStyle("Message", null);
         StyleConstants.setForeground(userMessageStyle, Color.BLACK);
@@ -134,21 +140,19 @@ public class UserGUI {
         StyleConstants.setFontFamily(systemMessageStyle, "Arial");
         StyleConstants.setFontSize(systemMessageStyle, 12);
     }
-    
-    public void UpdateRoomList(ArrayList<String> roomList)
-    {
+
+    // RFA6
+    public void UpdateRoomList(ArrayList<String> roomList) {
         roomListElement.clear();
         for (String r : roomList) {
             roomListElement.addElement(r);
-        }   
+        }
     }
 
-    private void SetButtonActions(UserChat user) {
+    private void SetButtonActions() {
         // Listener da troca de sala selecionada
-        roomListVisual.addListSelectionListener(new ListSelectionListener() 
-        {
-            public void valueChanged(ListSelectionEvent e)
-            {
+        roomListVisual.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
                     if (roomListVisual.getSelectedIndex() != -1) {
                         selectedRoom = roomListVisual.getSelectedValue();
@@ -186,7 +190,8 @@ public class UserGUI {
 
         // Botão de criar sala
         createButton.addActionListener(e -> {
-            String roomName = JOptionPane.showInputDialog(frame, "Room name:", "Create Room", JOptionPane.QUESTION_MESSAGE).strip();
+            String roomName = JOptionPane
+                    .showInputDialog(frame, "Room name:", "Create Room", JOptionPane.QUESTION_MESSAGE).strip();
 
             if (roomName != null && !roomName.isEmpty()) {
                 try {
@@ -196,7 +201,8 @@ public class UserGUI {
                 } catch (Exception err) {
                     String message = err.getMessage();
                     if (message.contains("INVALIDNAME"))
-                        JOptionPane.showMessageDialog(frame, "This name is already in use", "Error creating room", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "This name is already in use", "Error creating room",
+                                JOptionPane.ERROR_MESSAGE);
                     else
                         JOptionPane.showMessageDialog(frame, "Error creating room");
                     System.out.println("Client Exception! " + message);
@@ -204,6 +210,7 @@ public class UserGUI {
             }
         });
 
+        // Botão de entrar na sala selecionada
         joinButton.addActionListener(e -> {
             if (selectedRoom.equals(user.getCurrentRoomName())) {
                 JOptionPane.showMessageDialog(frame, "You are already in this room");
@@ -211,7 +218,9 @@ public class UserGUI {
             }
 
             while (user.getUsrName().isEmpty()) {
-                user.setUsrName(JOptionPane.showInputDialog(frame, "Choose a nickname:", "Join Room", JOptionPane.QUESTION_MESSAGE).strip());
+                user.setUsrName(JOptionPane
+                        .showInputDialog(frame, "Choose a nickname:", "Join Room", JOptionPane.QUESTION_MESSAGE)
+                        .strip());
             }
 
             user.leaveRoom();
@@ -223,11 +232,12 @@ public class UserGUI {
                 frame.setTitle("Join some room to choose a nickname");
                 String message = err.getMessage();
                 if (message.contains("INVALIDNAME")) {
-                    JOptionPane.showMessageDialog(frame, "This name is already in use", "Error joining room", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "This name is already in use", "Error joining room",
+                            JOptionPane.ERROR_MESSAGE);
                 } else
                     JOptionPane.showMessageDialog(frame, "Error joining room");
             }
-            
+
             leaveButton.setEnabled(true);
             textField.setEditable(true);
             frame.setTitle(user.getUsrName() + " - " + user.getCurrentRoomName());
@@ -235,27 +245,32 @@ public class UserGUI {
             messagePane.setText("");
         });
 
+        // Botão de sair da sala atual
         leaveButton.addActionListener(e -> {
             user.leaveRoom();
-            leaveButton.setEnabled(false);
-            textField.setEditable(false);
-            textField.setText("");
-            frame.setTitle("Join some room to choose a nickname");
         });
     }
 
+    // Listener de fechar janela
     public void addWindowListener(WindowListener exitListener) {
         frame.addWindowListener(exitListener);
     }
 
-    public void ShowMessage(String senderName, String msg) { 
+    public void ShowMessage(String senderName, String msg) {
         StyledDocument document = messagePane.getStyledDocument();
 
         try {
             if (msg.startsWith("MESSAGE")) {
-                document.insertString(document.getLength(), senderName + ": " + msg.substring(8) + "\n", messagePane.getStyle("Message"));
+                document.insertString(document.getLength(), senderName + ": " + msg.substring(8) + "\n",
+                        messagePane.getStyle("Message"));
             } else if (msg.startsWith("SERVER")) {
-                document.insertString(document.getLength(), senderName + ": " +  msg.substring(7) + "\n", messagePane.getStyle("System"));
+                document.insertString(document.getLength(), senderName + ": " + msg.substring(7) + "\n",
+                        messagePane.getStyle("System"));
+            } else if (msg.startsWith("CLOSEROOM")) {
+                document.insertString(document.getLength(), senderName + ": " + msg.substring(10) + "\n",
+                        messagePane.getStyle("System"));
+                user.leaveRoom(); // RFA14
+                UpdateRoomList(user.getRoomList());
             }
         } catch (Exception e) {
             System.out.println(e);

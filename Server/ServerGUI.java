@@ -21,8 +21,7 @@ public class ServerGUI {
     private DefaultListModel<String> listModel;
     private JScrollPane listScroller;
 
-    public ServerGUI(ServerChat server)
-    {
+    public ServerGUI(ServerChat server) {
         frame = new JFrame("Server Window");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         GenerateMainPane();
@@ -31,8 +30,7 @@ public class ServerGUI {
         frame.setVisible(true);
     }
 
-    private void GenerateMainPane()
-    {
+    private void GenerateMainPane() {
         listModel = new DefaultListModel<String>();
 
         list = new JList<String>();
@@ -46,9 +44,9 @@ public class ServerGUI {
         label.setHorizontalTextPosition(JLabel.CENTER);
 
         frame.getContentPane().add(label, BorderLayout.NORTH);
-        
+
         listScroller = new JScrollPane(list);
-        listScroller.setPreferredSize(new Dimension(500,300));
+        listScroller.setPreferredSize(new Dimension(500, 300));
 
         frame.getContentPane().add(listScroller, BorderLayout.CENTER);
 
@@ -64,12 +62,13 @@ public class ServerGUI {
 
     private void SetButtonActions(ServerChat server) {
         opButton.addActionListener(a -> {
-            String roomName = JOptionPane.showInputDialog(frame, "Room name:", "Create Room", JOptionPane.QUESTION_MESSAGE).strip();
-            
+            String roomName = JOptionPane
+                    .showInputDialog(frame, "Room name:", "Create Room", JOptionPane.QUESTION_MESSAGE).strip();
+
             if (roomName == null || roomName.isEmpty()) {
                 return;
             }
-            
+
             try {
                 server.createRoom(roomName);
             } catch (Exception e) {
@@ -80,7 +79,7 @@ public class ServerGUI {
         clButton.addActionListener(a -> {
             for (String roomToClose : list.getSelectedValuesList()) {
                 try {
-                    server.closeRoom(roomToClose);                    
+                    server.closeRoom(roomToClose);
                 } catch (Exception e) {
                     System.out.println("Server Exception! " + e.getMessage());
                 }

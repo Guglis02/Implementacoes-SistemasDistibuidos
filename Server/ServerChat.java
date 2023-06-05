@@ -6,12 +6,13 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
+import Room.IRoomChat;
 import Room.RoomChat;
 
-public class ServerChat extends UnicastRemoteObject implements IServerChat
+public class ServerChat extends UnicastRemoteObject implements IServerChat // RFA17
 {
-    private ArrayList<String> roomList; //RFA1 RFA3
-    private ServerGUI gui; 
+    private ArrayList<String> roomList; // RFA1 RFA3
+    private ServerGUI gui;
     private static Registry registry;
 
     public ServerChat() throws RemoteException {
@@ -35,7 +36,7 @@ public class ServerChat extends UnicastRemoteObject implements IServerChat
             getRegistry().rebind(roomName, room);
             roomList.add(roomName);
             gui.CreateRoomVisual(roomName);
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Server Exception! " + e.getMessage());
         }
     }
@@ -46,38 +47,38 @@ public class ServerChat extends UnicastRemoteObject implements IServerChat
         }
 
         try {
+            IRoomChat room = (IRoomChat) getRegistry().lookup(roomName);
+            room.closeRoom();
             getRegistry().unbind(roomName);
             roomList.remove(roomName);
             gui.RemoveRoomVisual(roomName);
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Server Exception! " + e.getMessage());
         }
     }
 
     public static void main(String[] args) throws Exception {
         String name = "Servidor";
-        
+
         try {
             ServerChat serverObject = new ServerChat();
+            // RFA16
             getRegistry().rebind(name, serverObject);
-            
+
             System.out.println("The chat server is running...");
         } catch (Exception e) {
             System.out.println("Server Exception! " + e.getMessage());
         }
     }
 
-    private static Registry getRegistry()
-    {
-        if (registry == null)
-        {
+    private static Registry getRegistry() {
+        if (registry == null) {
             try {
                 registry = LocateRegistry.createRegistry(2020);
             } catch (RemoteException e1) {
                 try {
                     registry = LocateRegistry.getRegistry("localhost", 2020);
-                }
-                catch (RemoteException e2) {
+                } catch (RemoteException e2) {
                     System.out.println("Server Exception! " + e2.getMessage());
                 }
             }

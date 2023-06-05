@@ -6,15 +6,17 @@ import java.rmi.server.*;
 
 import User.IUserChat;
 
-public class RoomChat extends UnicastRemoteObject implements IRoomChat {
+public class RoomChat extends UnicastRemoteObject implements IRoomChat // RFA17
+{
     private String roomName;
-    private Map<String, IUserChat> userList; //RFA2
+    private Map<String, IUserChat> userList; // RFA2
 
     public RoomChat(String roomName) throws RemoteException {
         this.roomName = roomName;
         userList = new java.util.HashMap<String, IUserChat>();
     }
 
+    // RFA11
     public void sendMsg(String usrName, String msg) {
         for (Map.Entry<String, IUserChat> entry : userList.entrySet()) {
             try {
@@ -29,7 +31,7 @@ public class RoomChat extends UnicastRemoteObject implements IRoomChat {
         if (userList.containsKey(usrName)) {
             throw new RemoteException("INVALIDNAME " + usrName + " already exists in this room!");
         }
-    
+
         userList.put(usrName, user);
 
         for (Map.Entry<String, IUserChat> entry : userList.entrySet()) {
@@ -57,10 +59,11 @@ public class RoomChat extends UnicastRemoteObject implements IRoomChat {
         userList.remove(usrName);
     }
 
+    // RFA13
     public void closeRoom() {
         for (Map.Entry<String, IUserChat> entry : userList.entrySet()) {
             try {
-                entry.getValue().deliverMsg("SERVER", "SERVER Room" + roomName + "was closed!");
+                entry.getValue().deliverMsg("SERVER", "CLOSEROOM Room " + roomName + " was closed!");
                 userList.remove(entry.getKey());
             } catch (Exception e) {
                 System.out.println("Room Exception! " + e.getMessage());
