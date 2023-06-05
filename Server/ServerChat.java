@@ -7,10 +7,10 @@ import java.util.ArrayList;
 
 import Room.RoomChat;
 
-public class ServerChat implements IServerChat, java.io.Serializable
+public class ServerChat implements IServerChat
 {
     private ArrayList<String> roomList; //RFA1 RFA3
-    private transient ServerGUI gui; 
+    private ServerGUI gui; 
     private static Registry registry;
 
     public ServerChat() {

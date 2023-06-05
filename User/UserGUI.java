@@ -231,12 +231,16 @@ public class UserGUI {
             leaveButton.setEnabled(true);
             textField.setEditable(true);
             frame.setTitle(user.getUsrName() + " - " + user.getCurrentRoomName());
+            textField.setText("");
+            messagePane.setText("");
         });
 
         leaveButton.addActionListener(e -> {
             user.leaveRoom();
             leaveButton.setEnabled(false);
             textField.setEditable(false);
+            textField.setText("");
+            frame.setTitle("Join some room to choose a nickname");
         });
     }
 

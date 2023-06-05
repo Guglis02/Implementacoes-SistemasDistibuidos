@@ -6,12 +6,13 @@ import java.awt.event.WindowListener;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
 import Room.IRoomChat;
 import Server.IServerChat;
 
-public class UserChat implements IUserChat
+public class UserChat extends UnicastRemoteObject implements IUserChat
 {
     private String usrName;
 
@@ -22,7 +23,7 @@ public class UserChat implements IUserChat
 
     private ArrayList<String> roomList;
 
-    public UserChat(IServerChat server) {
+    public UserChat(IServerChat server) throws RemoteException {
         this.server = server;
         this.usrName = "";
         this.roomList = new ArrayList<String>();
@@ -98,7 +99,7 @@ public class UserChat implements IUserChat
 
         try {
             room.leaveRoom(usrName);
-            usrName = null;
+            usrName = "";
             room = null;
         } catch (RemoteException e) {
             System.err.println("Client exception! " + e.toString());
