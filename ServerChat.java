@@ -1,13 +1,8 @@
-package Server;
-
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-
-import Room.IRoomChat;
-import Room.RoomChat;
 
 public class ServerChat extends UnicastRemoteObject implements IServerChat // RFA17
 {

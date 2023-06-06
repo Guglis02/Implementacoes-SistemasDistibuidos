@@ -1,10 +1,6 @@
-package Room;
-
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.rmi.server.*;
-
-import User.IUserChat;
 
 public class RoomChat extends UnicastRemoteObject implements IRoomChat // RFA17
 {

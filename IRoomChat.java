@@ -1,8 +1,4 @@
-package Room;
-
 import java.rmi.RemoteException;
-
-import User.IUserChat;
 
 public interface IRoomChat extends java.rmi.Remote {
     public void sendMsg(String usrName, String msg) throws RemoteException;

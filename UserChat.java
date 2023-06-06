@@ -1,5 +1,3 @@
-package User;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -8,9 +6,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-
-import Room.IRoomChat;
-import Server.IServerChat;
 
 public class UserChat extends UnicastRemoteObject implements IUserChat // RFA17
 {

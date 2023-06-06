@@ -1,5 +1,3 @@
-package User;
-
 import java.rmi.RemoteException;
 
 public interface IUserChat extends java.rmi.Remote {
