@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+// Classe que representa o middleware de comunicação.
 public class CausalMulticast {
     static Integer multicastPort = 9000;
     MulticastSocket multicastSocket;
@@ -31,10 +32,13 @@ public class CausalMulticast {
         this.communicationThread = new CommunicationThread(this);
         this.clientPort = port;
         this.client = client;
+
+        // Setup do multicast para conexão com outros clientes.
         this.multicastSocket = new MulticastSocket(multicastPort);
         this.multicastAddress = InetAddress.getByName(ip);
         this.multicastSocket.joinGroup(multicastAddress);
         
+        // Setup do unicast usado para enviar as mensagens.
         this.unicastSocket = new DatagramSocket(port);
         this.unicastAddress = InetAddress.getLocalHost();
         
@@ -49,8 +53,10 @@ public class CausalMulticast {
         this.communicationThread.start();
     }
     
+    // Método que recebe uma mensagem e a envia para os clientes.
     public void mcsend(String msg, ICausalMulticast client)
     {
+        // Comando que esvazia o buffer de envio.
         if (msg.equals("/sendDelayed"))
         {
             SendDelayedMessages();
@@ -87,6 +93,7 @@ public class CausalMulticast {
         }
     }
     
+    // Envia as mensagens salvas no buffer.
     private void SendDelayedMessages()
     {
         for (String message : delayedMessages)

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.lang.System;
 
-// Classe que representa a thread que fica escutando as mensagens que chegam
+// Classe que representa a thread que fica escutando as mensagens que chegam.
 public class CommunicationThread extends Thread
 {
     private CausalMulticast causalMulticast;
@@ -49,6 +49,7 @@ public class CommunicationThread extends Thread
         }
     }
 
+    // Fica ouvindo mensagens de busca de outros clientes enquanto emite sua mensagem de busca.
     public void SearchForUsers() throws IOException
     {
         SendSearchMessage(this.causalMulticast.clientPort.toString());
@@ -83,6 +84,7 @@ public class CommunicationThread extends Thread
         }
     }
 
+    // Envia uma mensagem de busca para os outros clientes.
     private void SendSearchMessage(String message)
     {
         String searchMessage = String.format("USRJOIN_%s", message);
@@ -94,6 +96,7 @@ public class CommunicationThread extends Thread
         }
     }
 
+    // Recebe um vector clock em formato de string e o transforma em um map.
     Map<String, Integer> ExtractMessageVectorClock(String messageVectorClockString)
     {
         Map<String, Integer> messageVectorClock = new HashMap<String, Integer>();
@@ -105,9 +108,10 @@ public class CommunicationThread extends Thread
         return messageVectorClock;
     }
 
+    // Desmonta a mensagem recebida e age de acordo.
     // As mensagens seguem o seguinte padrão:
-    // Mensagem de join: USRJOIN_nome do usuário
-    // Mensagem normal: USRMSG_nome do usuário_mensagem_relógio vetorial
+    // Mensagem de join: USRJOIN_port do usuario
+    // Mensagem normal: USRMSG_port do usuario_mensagem_relógio vetorial
     private void ParseMessage(String message)
     {
         String[] splittedMessage = message.split("_");
@@ -120,11 +124,6 @@ public class CommunicationThread extends Thread
         if (splittedMessage[0].equals("USRJOIN"))
         {
             return;
-            // try {
-            //     SearchForUsers();
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-            // }
         }
         else if (splittedMessage[0].equals("USRMSG"))
         {
@@ -148,6 +147,7 @@ public class CommunicationThread extends Thread
         }
     }
 
+    // Verifica se a mensagem pode ser entregue de acordo com o algoritmo do vector clock.
     private Boolean CanDeliverMessage(Map<String, Integer> messageVectorClock)
     {
         for (Map.Entry<String, Integer> entry : messageVectorClock.entrySet())
@@ -160,6 +160,7 @@ public class CommunicationThread extends Thread
         return true;
     }
     
+    // Tenta entregar as mensagens que estão no buffer de recebimento.
     private void TryToDeliverBufferedMessages() {
         synchronized (this) {
             Iterator<String> iterator = messageBuffer.iterator();
