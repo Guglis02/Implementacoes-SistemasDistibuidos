@@ -16,14 +16,18 @@ public class Client implements ICausalMulticast{
     }
 
     public void deliver(String msg){
-        System.out.println(msg);
+        System.out.println("Mensagem recebida: " + msg);
     }
 
     public static void main(String[] args) {
-        Client client = new Client(args[0], Integer.parseInt(args[1]));
+        Client client;
+        
+        client = new Client("228.0.0.1", Integer.parseInt(args[0]));
+
         Scanner scanner = new Scanner(System.in);
 
-        while(true){
+        while(true)
+        {
             String msg = scanner.nextLine();
             client.causalMulticast.mcsend(msg, client);
         }        
