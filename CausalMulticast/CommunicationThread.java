@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.lang.System;
@@ -13,13 +14,12 @@ public class CommunicationThread extends Thread
 {
     private CausalMulticast causalMulticast;
     
-    private String message;
     public Map<Integer, Integer> vectorClock = new HashMap<Integer, Integer>();
     public ArrayList<String> messageBuffer = new ArrayList<String>();
 
     public ArrayList<Integer> clientList = new ArrayList<Integer>();
 
-    private int maxConnections = 2;
+    private int maxConnections = 3;
 
     public CommunicationThread(CausalMulticast causalMulticast)
     {
@@ -44,7 +44,8 @@ public class CommunicationThread extends Thread
             String multicastMsg = new String(multicastPacket.getData(), 0, multicastPacket.getLength());
             String unicastMsg = new String(unicastPacket.getData(), 0, unicastPacket.getLength());
             ParseMessage(multicastMsg);
-            ParseMessage(unicastMsg);            
+            ParseMessage(unicastMsg);          
+            TryToDeliverBufferedMessages();  
         }
     }
 
@@ -67,7 +68,7 @@ public class CommunicationThread extends Thread
                 {
                     clientList.add(clientPort);
                     this.vectorClock.put(clientPort, 0);
-                    this.vectorClock = new TreeMap<Integer, Integer>(this.vectorClock);
+                    this.vectorClock = new TreeMap<Integer, Integer>(vectorClock);
                     
                     System.out.println(clientPort + " entrou no grupo.");
                 }
@@ -118,23 +119,60 @@ public class CommunicationThread extends Thread
         
         if (splittedMessage[0].equals("USRJOIN"))
         {
-            try {
-                maxConnections++;
-                SearchForUsers();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return;
+            // try {
+            //     SearchForUsers();
+            // } catch (IOException e) {
+            //     e.printStackTrace();
+            // }
         }
         else if (splittedMessage[0].equals("USRMSG"))
         {
             Map<String, Integer> messageVectorClock = ExtractMessageVectorClock(splittedMessage[3]);
+            System.out.println();
             System.out.println("Relogio vetorial recebido: " + messageVectorClock.toString());        
-            System.out.println("Relogio vetorial atual: " + this.vectorClock.toString());
+            System.out.println("Relogio vetorial do receptor: " + this.vectorClock.toString());
 
-            // Testar se a mensagem pode ser entregue
-            // Se puder entrega, senão adiciona no buffer
-            causalMulticast.client.deliver(splittedMessage[1] + " - " + splittedMessage[2]);
+            if (CanDeliverMessage(messageVectorClock))
+            {
+                causalMulticast.client.deliver(splittedMessage[1] + " - " + splittedMessage[2]);
+                this.vectorClock.put(Integer.parseInt(splittedMessage[1]), this.vectorClock.get(Integer.parseInt(splittedMessage[1])) + 1);      
+            } else {
+                System.out.println("Mensagem" + splittedMessage[2] + "adicionada ao buffer.");
+                messageBuffer.add(message);
+            }
+
+            System.out.println();
+            System.out.println("Relogio vetorial atual: " + this.vectorClock.toString());
+            System.out.println("Mensagens no buffer de recebimento: " + messageBuffer.toString());
         }
     }
+
+    private Boolean CanDeliverMessage(Map<String, Integer> messageVectorClock)
+    {
+        for (Map.Entry<String, Integer> entry : messageVectorClock.entrySet())
+        {
+            if (entry.getValue() > this.vectorClock.get(Integer.parseInt(entry.getKey())))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
     
+    private void TryToDeliverBufferedMessages() {
+        synchronized (this) {
+            Iterator<String> iterator = messageBuffer.iterator();
+            while (iterator.hasNext()) {
+                String message = iterator.next();
+                String[] splittedMessage = message.split("_");
+                Map<String, Integer> messageVectorClock = ExtractMessageVectorClock(splittedMessage[3]);
+                if (CanDeliverMessage(messageVectorClock)) {
+                    causalMulticast.client.deliver(splittedMessage[1] + " - " + splittedMessage[2]);
+                    this.vectorClock.put(Integer.parseInt(splittedMessage[1]), this.vectorClock.get(Integer.parseInt(splittedMessage[1])) + 1);
+                    iterator.remove();
+                }
+            }
+        }
+    }
 }

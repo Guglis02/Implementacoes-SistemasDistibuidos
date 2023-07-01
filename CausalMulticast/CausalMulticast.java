@@ -24,6 +24,8 @@ public class CausalMulticast {
 
     Scanner scanner = new Scanner(System.in);
 
+    ArrayList<String> delayedMessages = new ArrayList<String>();
+
     public CausalMulticast(String ip, Integer port, ICausalMulticast client) throws IOException
     {   
         this.communicationThread = new CommunicationThread(this);
@@ -49,6 +51,12 @@ public class CausalMulticast {
     
     public void mcsend(String msg, ICausalMulticast client)
     {
+        if (msg.equals("/sendDelayed"))
+        {
+            SendDelayedMessages();
+            return;
+        }
+
         System.out.println("A mensagem: \"" + msg + "\" deve ser enviada para todos? (S/N) ");
         String sendToAllAnswer = scanner.nextLine();
 
@@ -73,6 +81,25 @@ public class CausalMulticast {
                     e.printStackTrace();
                 }
             }
+            else {
+                delayedMessages.add(user.toString() + "_" + msg + "_" + vectorClockCopy);
+            }
         }
+    }
+    
+    private void SendDelayedMessages()
+    {
+        for (String message : delayedMessages)
+        {
+            String splittedMessage[] = message.split("_");
+            String messageToSend = "USRMSG_" + this.clientPort + "_" + splittedMessage[1] + "_" + splittedMessage[2];
+            DatagramPacket sendPacket = new DatagramPacket(messageToSend.getBytes(), messageToSend.length(), this.unicastAddress, Integer.parseInt(splittedMessage[0]));
+            try {
+                this.unicastSocket.send(sendPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        delayedMessages.clear();
     }
 }
