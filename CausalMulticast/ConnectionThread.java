@@ -45,7 +45,7 @@ public class ConnectionThread extends Thread {
                 if (!causalMulticast.clientList.contains(clientPort))
                 {
                     causalMulticast.clientList.add(clientPort);
-                    causalMulticast.vectorClock.put(clientPort, 0);
+                    causalMulticast.vectorClock.put(clientPort, Integer.parseInt(splitMessage[2]));
                     causalMulticast.ReorderVectorClock();
                     latch.countDown();
 
