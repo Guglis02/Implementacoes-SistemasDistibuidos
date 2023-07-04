@@ -5,10 +5,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 // Classe que representa o middleware de comunicação.
 public class CausalMulticast {
@@ -23,13 +21,20 @@ public class CausalMulticast {
     Integer clientPort;
     CommunicationThread communicationThread;
 
+    ConnectionThread connectionThread;
+
     Scanner scanner = new Scanner(System.in);
 
-    ArrayList<String> delayedMessages = new ArrayList<String>();
+    ArrayList<String> delayedMessages = new ArrayList<>();
+
+    public CopyOnWriteArrayList<Integer> clientList = new CopyOnWriteArrayList<>();
+
+    public Map<Integer, Integer> vectorClock = Collections.synchronizedMap(new HashMap<>());
 
     public CausalMulticast(String ip, Integer port, ICausalMulticast client) throws IOException
     {   
         this.communicationThread = new CommunicationThread(this);
+        this.connectionThread = new ConnectionThread(this);
         this.clientPort = port;
         this.client = client;
 
@@ -42,13 +47,16 @@ public class CausalMulticast {
         this.unicastSocket = new DatagramSocket(port);
         this.unicastAddress = InetAddress.getLocalHost();
         
-        communicationThread.vectorClock.put(clientPort, 0);
-        
+        vectorClock.put(clientPort, 0);
+
+        connectionThread.start();
+
         try {
-            this.communicationThread.SearchForUsers();
-        } catch (IOException e) {
+            // Espera que três usuários estejam conectados.
+            connectionThread.WaitForUsers();
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        }      
+        }
 
         this.communicationThread.start();
     }
@@ -66,10 +74,10 @@ public class CausalMulticast {
         System.out.println("A mensagem: \"" + msg + "\" deve ser enviada para todos? (S/N) ");
         String sendToAllAnswer = scanner.nextLine();
 
-        Map<Integer, Integer> vectorClockCopy = new HashMap<Integer, Integer>(this.communicationThread.vectorClock);
-        this.communicationThread.vectorClock.put(this.clientPort, this.communicationThread.vectorClock.get(this.clientPort) + 1);
+        Map<Integer, Integer> vectorClockCopy = new HashMap<>(this.vectorClock);
+        this.vectorClock.put(this.clientPort, this.vectorClock.get(this.clientPort) + 1);
 
-        for (Integer user : communicationThread.clientList)
+        for (Integer user : clientList)
         {
             String sendAnswer = null;
             if (sendToAllAnswer.equals("N"))
@@ -91,6 +99,11 @@ public class CausalMulticast {
                 delayedMessages.add(user.toString() + "_" + msg + "_" + vectorClockCopy);
             }
         }
+    }
+
+    public synchronized void ReorderVectorClock()
+    {
+        vectorClock = Collections.synchronizedMap(new TreeMap<>(vectorClock));
     }
     
     // Envia as mensagens salvas no buffer.
