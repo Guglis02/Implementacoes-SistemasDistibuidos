@@ -8,7 +8,9 @@ import java.net.MulticastSocket;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-// Classe que representa o middleware de comunicação.
+/**
+ * Classe que representa o middleware de comunicação.
+ */
 public class CausalMulticast {
     static Integer multicastPort = 9000;
     MulticastSocket multicastSocket;
@@ -31,6 +33,13 @@ public class CausalMulticast {
 
     public Map<Integer, Integer> vectorClock = Collections.synchronizedMap(new HashMap<>());
 
+    /**
+     * Construtor da classe CausalMulticast.
+     * @param ip O endereço IP para conexão com o multicast.
+     * @param port A porta para conexão com o unicast.
+     * @param client O cliente que implementa ICausalMulticast.
+     * @throws IOException Em caso de erro de I/O durante a criação dos sockets.
+     */
     public CausalMulticast(String ip, Integer port, ICausalMulticast client) throws IOException
     {   
         this.communicationThread = new CommunicationThread(this);
@@ -61,7 +70,11 @@ public class CausalMulticast {
         this.communicationThread.start();
     }
     
-    // Método que recebe uma mensagem e a envia para os clientes.
+    /**
+     * Método que recebe uma mensagem e a envia para os clientes.
+     * @param msg A mensagem a ser enviada.
+     * @param client O cliente que implementa ICausalMulticast.
+     */
     public void mcsend(String msg, ICausalMulticast client)
     {
         // Comando que esvazia o buffer de envio.
@@ -101,12 +114,17 @@ public class CausalMulticast {
         }
     }
 
+    /**
+     * Reordena o vector clock.
+     */
     public synchronized void ReorderVectorClock()
     {
         vectorClock = Collections.synchronizedMap(new TreeMap<>(vectorClock));
     }
     
-    // Envia as mensagens salvas no buffer.
+    /**
+     * Envia as mensagens salvas no buffer.
+     */
     private void SendDelayedMessages()
     {
         for (String message : delayedMessages)

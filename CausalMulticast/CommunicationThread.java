@@ -6,22 +6,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
-import java.lang.System;
-import java.util.concurrent.CountDownLatch;
 
-// Classe que representa a thread que fica escutando as mensagens que chegam.
+/**
+ * Classe que representa a thread responsável por escutar as mensagens recebidas.
+ */
 public class CommunicationThread extends Thread
 {
     private CausalMulticast causalMulticast;
 
     public ArrayList<String> messageBuffer = new ArrayList<>();
 
+    /**
+     * Construtor da classe CommunicationThread.
+     * @param causalMulticast Uma instância de CausalMulticast.
+     */
     public CommunicationThread(CausalMulticast causalMulticast)
     {
         this.causalMulticast = causalMulticast;
     }
 
+    /**
+     * Método executado quando a thread é iniciada.
+     */
     @Override
     public void run()
     {
@@ -41,7 +47,11 @@ public class CommunicationThread extends Thread
         }
     }
 
-    // Recebe um vector clock em formato de string e o transforma em um map.
+    /**
+     * Extrai o vector clock da mensagem.
+     * @param messageVectorClockString O vector clock formatado em string.
+     * @return O vector clock como um Map.
+     */
     Map<String, Integer> ExtractMessageVectorClock(String messageVectorClockString)
     {
         Map<String, Integer> messageVectorClock = new HashMap<>();
@@ -53,10 +63,10 @@ public class CommunicationThread extends Thread
         return messageVectorClock;
     }
 
-    // Desmonta a mensagem recebida e age de acordo.
-    // As mensagens seguem o seguinte padrão:
-    // Mensagem de join: USRJOIN_port do usuario
-    // Mensagem normal: USRMSG_port do usuario_mensagem_relógio vetorial
+    /**
+     * Desmonta a mensagem recebida e age de acordo.
+     * @param message A mensagem recebida.
+     */
     private void ParseMessage(String message)
     {
         String[] splitMessage = message.split("_");
@@ -70,8 +80,8 @@ public class CommunicationThread extends Thread
         {
             Map<String, Integer> messageVectorClock = ExtractMessageVectorClock(splitMessage[3]);
             System.out.println();
-            System.out.println("Relogio vetorial recebido: " + messageVectorClock.toString());        
-            System.out.println("Relogio vetorial do receptor: " + causalMulticast.vectorClock.toString());
+            System.out.println("Relógio vetorial recebido: " + messageVectorClock.toString());        
+            System.out.println("Relógio vetorial do receptor: " + causalMulticast.vectorClock.toString());
 
             if (CanDeliverMessage(messageVectorClock))
             {
@@ -83,12 +93,16 @@ public class CommunicationThread extends Thread
             }
 
             System.out.println();
-            System.out.println("Relogio vetorial atual: " + causalMulticast.vectorClock.toString());
-            System.out.println("Mensagens no buffer de recebimento: " + messageBuffer.toString());
+            System.out.println("Relógio vetorial atual: " + causalMulticast.vectorClock.toString());
+            System.out.println("Mensagens no buffer de recebimento: "+ messageBuffer.toString());
         }
     }
 
-    // Verifica se a mensagem pode ser entregue de acordo com o algoritmo do vector clock.
+    /**
+     * Verifica se a mensagem pode ser entregue de acordo com o algoritmo do vector clock.
+     * @param messageVectorClock O vector clock da mensagem.
+     * @return true se a mensagem pode ser entregue, false caso contrário.
+     */
     private Boolean CanDeliverMessage(Map<String, Integer> messageVectorClock)
     {
         for (Map.Entry<String, Integer> entry : messageVectorClock.entrySet())
@@ -101,7 +115,9 @@ public class CommunicationThread extends Thread
         return true;
     }
     
-    // Tenta entregar as mensagens que estão no buffer de recebimento.
+    /**
+     * Tenta entregar as mensagens que estão no buffer de recebimento.
+     */
     private void TryToDeliverBufferedMessages() {
         synchronized (this) {
             Iterator<String> iterator = messageBuffer.iterator();
