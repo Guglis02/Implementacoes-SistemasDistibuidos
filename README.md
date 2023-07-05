@@ -1,9 +1,11 @@
 # Causal-Multicast
 Trabalho 3 da disciplina de Sistemas Distribuidos
+Guilherme Medeiros da Cunha
+Gustavo Machado de Freitas
 
 ## Como rodar
-Atualmente o programa só permite troca de mensagem com exatos 3 participantes.
-Então devem ser abertos três terminais com o comando:    
+O programa só permite troca de mensagem após a entrada de 3 participantes.
+Então devem ser abertos ao menos três terminais com o comando:    
   
 java Client port  
   
